@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe | 1v1 Arcade Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              900: "#0f2746",
+              800: "#153463",
+              700: "#1b4b82",
+              600: "#2a5a9a"
+            },
+            lightBlue: "#5fa6ff",
+            xColor: "#66a8ff",
+            oColor: "#f8f0ce"
+          },
+          fontFamily: { 
+            ui: ["Segoe UI", "Inter", "system-ui", "sans-serif"] 
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .cell {
+      aspect-ratio: 1;
+      transition: all 0.2s ease;
+    }
+    .cell:hover {
+      transform: scale(1.05);
+    }
+    .cell.last-move {
+      box-shadow: 0 0 20px rgba(95, 166, 255, 0.6);
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, rgba(95, 166, 255, 0.3) 0%, rgba(95, 166, 255, 0.1) 100%);
+      animation: progress 30s linear infinite;
+    }
+    @keyframes progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-navy-900 text-white font-ui">
+  <!-- Header -->
+  <header class="w-full bg-navy-900 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">🎮</span>
+        <span class="text-lg font-semibold">1v1 Arcade Hub</span>
+      </div>
+      <nav class="flex items-center gap-8">
+        <a href="tic-tac-toe.html" class="text-lightBlue font-semibold border-b-2 border-lightBlue pb-1">Tic-Tac-Toe</a>
+        <a href="connect4.html" class="text-slate-300 hover:text-white transition">Connect-4</a>
+        <a href="rock-paper-scissor.html" class="text-slate-300 hover:text-white transition">Rock-Paper-Scissors</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="bg-lightBlue text-navy-900 px-4 py-2 rounded-lg font-semibold hover:brightness-110 transition" onclick="init()">New Game</button>
+        <img src="asset/profile/profile.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-lightBlue/30">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
+      
+      <!-- Left Panel: Game Info & Controls -->
+      <aside class="space-y-6">
+        <!-- Classic Mode Section -->
+        <div class="bg-navy-800 rounded-2xl p-6 shadow-lg">
+          <div class="inline-block bg-lightBlue text-navy-900 text-xs font-bold px-3 py-1 rounded-full mb-3">
+            CLASSIC MODE
+          </div>
+          <h1 class="text-3xl font-bold mb-2">Tic-Tac-Toe</h1>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            The classic strategy game. Get three in a row to win!
+          </p>
+          
+          <!-- Mode Selection -->
+          <div class="space-y-2">
+            <p class="text-xs text-slate-300 uppercase font-semibold mb-2">Game Mode</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button id="modeHuman" class="bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition">
+                Human vs Human
+              </button>
+              <button id="modeBot" class="bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition">
+                vs Bot
+              </button>
+              <!-- Bot vs Bot removed -->
+            </div>
+
+            <!-- Bot role selection (only relevant for vs Bot mode) -->
+            <div class="mt-3 text-sm text-slate-300">
+              <label class="mr-2">Bot plays as:</label>
+              <button id="botAsX" class="bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition mr-1">X</button>
+              <button id="botAsO" class="bg-lightBlue text-navy-900 px-3 py-1 rounded-lg text-xs hover:brightness-110 transition">O</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Turn Section -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <p class="text-xs text-navy-900/70 font-semibold uppercase mb-3">CURRENT TURN</p>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="text-4xl font-black text-navy-900" id="currentSymbol">X</span>
+            <span class="text-xl font-bold text-navy-900" id="currentPlayer">KEVIN</span>
+          </div>
+          <div class="relative h-2 bg-navy-900/20 rounded-full overflow-hidden">
+            <div class="progress-bar h-full rounded-full" id="progressBar"></div>
+            <span class="absolute right-2 top-0 text-xs text-navy-900/50 font-semibold">X</span>
+          </div>
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-navy-800 rounded-xl p-4 shadow-lg text-center">
+            <p class="text-xs text-slate-300 uppercase mb-2">PLAYER 1 (X)</p>
+            <p class="text-4xl font-black text-white" id="xScore">3</p>
+            <p class="text-xs text-slate-400 mt-1">Wins</p>
+          </div>
+          <div class="bg-navy-800 rounded-xl p-4 shadow-lg text-center">
+            <p class="text-xs text-slate-300 uppercase mb-2">PLAYER 2 (O)</p>
+            <p class="text-4xl font-black text-white" id="oScore">2</p>
+            <p class="text-xs text-slate-400 mt-1">Wins</p>
+          </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="space-y-3">
+          <button id="resetScore" class="w-full bg-navy-800 text-white font-semibold py-3 rounded-xl shadow-lg hover:bg-navy-700 transition flex items-center justify-center gap-2">
+            <span>↻</span>
+            <span>Reset Score</span>
+          </button>
+          <button id="quit" class="w-full bg-navy-800 text-white font-semibold py-3 rounded-xl shadow-lg hover:bg-navy-700 transition flex items-center justify-center gap-2">
+            <span>←</span>
+            <span>Quit</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Game Board -->
+      <section class="bg-navy-800 rounded-3xl p-6 shadow-2xl relative">
+        <!-- Window Controls -->
+        <div class="absolute top-4 left-4 flex gap-2">
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div class="w-3 h-3 rounded-full bg-white"></div>
+        </div>
+
+        <!-- Restart Round Button -->
+        <div class="absolute top-4 right-4">
+          <button id="restartRound" class="bg-navy-700 text-white font-semibold px-4 py-2 rounded-lg hover:bg-navy-600 transition flex items-center gap-2 text-sm">
+            <span>↻</span>
+            <span>Restart Round</span>
+          </button>
+        </div>
+
+        <!-- Game Board -->
+        <div class="mt-12 mb-8">
+          <div id="grid" class="grid grid-cols-3 gap-3 bg-navy-700 rounded-2xl p-4 max-w-md mx-auto">
+            <!-- Cells will be injected here -->
+          </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="flex items-center justify-between mt-8 pt-4 border-t border-white/10">
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="font-semibold">Round</span>
+            <span class="text-2xl font-black text-white" id="roundNumber">5</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <span>🕐</span>
+            <span class="font-mono" id="elapsedTime">00:15</span>
+            <span class="text-sm">elapsed</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full text-center py-6 text-slate-400 text-sm">
+    <p>© 2024 Arcade Hub. All rights reserved.</p>
+  </footer>
+
+  <script>
+    let board, current, scores = { x: 3, o: 2 }, ended = false, roundNumber = 5, lastMoveIdx = -1;
+    let timerStart = null, timerInterval = null;
+    let gameMode = "human"; // "human" or "bot"
+    let bots = { X: false, O: false };
+
+    const gridEl = document.getElementById("grid");
+    const currentSymbol = document.getElementById("currentSymbol");
+    const currentPlayer = document.getElementById("currentPlayer");
+    const xScoreEl = document.getElementById("xScore");
+    const oScoreEl = document.getElementById("oScore");
+    const roundNumberEl = document.getElementById("roundNumber");
+    const elapsedTimeEl = document.getElementById("elapsedTime");
+    const progressBar = document.getElementById("progressBar");
+    const modeHumanBtn = document.getElementById("modeHuman");
+    const modeBotBtn = document.getElementById("modeBot");
+    // Bot vs Bot mode removed; no button reference
+    const botAsXBtn = document.getElementById("botAsX");
+    const botAsOBtn = document.getElementById("botAsO");
+
+    // Initialize mode and bot toggle visuals (default: Human vs Human)
+    modeHumanBtn.className = "bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition";
+    modeBotBtn.className = "bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition";
+    // modeBotBotBtn removed; no class initialization
+    botAsXBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition mr-1";
+    botAsOBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition";
+
+    function startTimer() {
+      timerStart = Date.now();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - timerStart) / 1000);
+        const m = String(Math.floor(diff / 60)).padStart(2, "0");
+        const s = String(diff % 60).padStart(2, "0");
+        elapsedTimeEl.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function init() {
+      board = Array(9).fill("");
+      current = "X";
+      ended = false;
+      lastMoveIdx = -1;
+      render();
+      updateTurn();
+      startTimer();
+      resetProgressBar();
+      // If the starting player is bot-controlled, let the bot make the first move
+      if (bots[current]) {
+        setTimeout(botMove, 500);
+      }
+    }
+
+    function resetProgressBar() {
+      progressBar.style.animation = "none";
+      setTimeout(() => {
+        progressBar.style.animation = "progress 30s linear infinite";
+      }, 10);
+    }
+
+    function render() {
+      gridEl.innerHTML = "";
+      board.forEach((val, idx) => {
+        const cell = document.createElement("button");
+        cell.className = `cell bg-navy-600 rounded-xl flex items-center justify-center text-6xl font-black cursor-pointer hover:bg-navy-500 transition`;
+        if (idx === lastMoveIdx) {
+          cell.classList.add("last-move");
+        }
+        if (val === "X") {
+          cell.classList.add("text-xColor");
+          cell.textContent = "X";
+        } else if (val === "O") {
+          cell.classList.add("text-oColor");
+          cell.textContent = "O";
+        }
+        if (!ended && !val && !bots[current]) {
+          cell.addEventListener("click", () => move(idx));
+          cell.disabled = false;
+          cell.classList.remove("opacity-60");
+          // For debug: mark clickable cells
+          // console.log(`render: add click for idx=${idx} current=${current}`);
+        } else {
+          // visually disable cursor if it's not the human's turn
+          cell.classList.remove("cursor-pointer");
+          cell.classList.add("cursor-default");
+          cell.disabled = true;
+          cell.classList.add("opacity-60");
+          // For debug: mark disabled cells
+          // console.log(`render: disable idx=${idx} current=${current} val=${val}`);
+        }
+        gridEl.appendChild(cell);
+      });
+    }
+
+    function move(idx, byBot = false) {
+      console.log(`move called idx=${idx} byBot=${byBot} current=${current} ended=${ended}`);
+      // Debug
+      // console.log(`move called idx=${idx} byBot=${byBot} current=${current} ended=${ended}`, board);
+      if (ended || board[idx]) return;
+      // Prevent human player from moving when it's bot's turn (allow bot moves when byBot=true)
+      if (bots[current] && !byBot) return;
+      board[idx] = current;
+      lastMoveIdx = idx;
+      render();
+      resetProgressBar();
+      
+      const winner = checkWinner();
+      if (winner) {
+        ended = true;
+        scores[winner.toLowerCase()]++;
+        updateScores();
+        setTimeout(() => {
+          roundNumber++;
+          roundNumberEl.textContent = roundNumber;
+          if (confirm(`Player ${winner} wins! Start a new round?`)) {
+            init();
+          }
+        }, 500);
+        return;
+      }
+      
+      if (board.every(Boolean)) {
+        ended = true;
+        setTimeout(() => {
+          roundNumber++;
+          roundNumberEl.textContent = roundNumber;
+          if (confirm("It's a draw! Start a new round?")) {
+            init();
+          }
+        }, 500);
+        return;
+      }
+      
+      current = current === "X" ? "O" : "X";
+      updateTurn();
+      // Re-render after turn change so clickable state and cursor are updated
+      render();
+      
+      // Bot move if next player is a bot
+      if (bots[current] && !ended) {
+        // Debug
+        // console.log(`schedule bot move for ${current}`);
+        botMove();
+      }
+    }
+
+    function checkWinner() {
+      const lines = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (const [a,b,c] of lines) {
+        if (board[a] && board[a] === board[b] && board[b] === board[c]) {
+          return board[a];
+        }
+      }
+      return null;
+    }
+
+    function updateTurn() {
+      currentSymbol.textContent = current;
+      if (bots[current]) {
+        currentPlayer.textContent = "BOT";
+      } else {
+        currentPlayer.textContent = current === "X" ? "KEVIN" : "OPPONENT";
+      }
+    }
+
+    function botMove() {
+      console.log(`botMove called; current=${current} bots=${JSON.stringify(bots)} ended=${ended}`);
+      if (ended || !bots[current]) return;
+      // Debug
+      // console.log(`botMove called current=${current} board=${JSON.stringify(board)}`);
+      const botSymbol = current;
+      const humanSymbol = botSymbol === "X" ? "O" : "X";
+      let bestMove = chooseBestMoveByMinimax(botSymbol, humanSymbol);
+      console.log(`botMove chose bestMove=${bestMove}`);
+      // Fallback: choose any available slot if chosen one is not free or undefined
+      if (bestMove === -1 || board[bestMove]) {
+        const available = [];
+        for (let i = 0; i < 9; i++) if (!board[i]) available.push(i);
+        if (available.length > 0) {
+          bestMove = available[0];
+        } else {
+          bestMove = -1;
+        }
+      }
+      if (bestMove !== -1) {
+        // show thinking indicator
+        currentPlayer.textContent = "BOT (thinking...)";
+        setTimeout(() => {
+          console.log(`botMove performing move at ${bestMove}`);
+          move(bestMove, true);
+        }, 500);
+      }
+    }
+
+    function chooseBestMoveByMinimax(botSymbol, humanSymbol) {
+      const available = [];
+      for (let i = 0; i < 9; i++) if (!board[i]) available.push(i);
+      if (available.length === 0) return -1;
+      let bestScore = -Infinity;
+      let bestIdx = -1;
+      for (const idx of available) {
+        board[idx] = botSymbol;
+        const score = minimax(board.slice(), 0, false, botSymbol, humanSymbol);
+        board[idx] = "";
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = idx;
+        }
+      }
+      return bestIdx;
+    }
+
+    function minimax(bd, depth, isMinimizing, botSymbol, humanSymbol) {
+      const winner = checkWinnerBoard(bd);
+      if (winner) {
+        if (winner === botSymbol) return 10 - depth;
+        if (winner === humanSymbol) return depth - 10;
+      }
+      if (bd.every(Boolean)) return 0;
+
+      if (!isMinimizing) {
+        let maxEval = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (bd[i]) continue;
+          bd[i] = botSymbol;
+          const evalScore = minimax(bd, depth + 1, true, botSymbol, humanSymbol);
+          bd[i] = "";
+          maxEval = Math.max(maxEval, evalScore);
+        }
+        return maxEval;
+      } else {
+        let minEval = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (bd[i]) continue;
+          bd[i] = humanSymbol;
+          const evalScore = minimax(bd, depth + 1, false, botSymbol, humanSymbol);
+          bd[i] = "";
+          minEval = Math.min(minEval, evalScore);
+        }
+        return minEval;
+      }
+    }
+
+    function checkWinnerBoard(b) {
+      const lines = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      for (const [a,bIdx,c] of lines) {
+        if (b[bIdx] && b[a] === b[bIdx] && b[bIdx] === b[c]) {
+          return b[a];
+        }
+      }
+      return null;
+    }
+
+    function updateScores() {
+      xScoreEl.textContent = scores.x;
+      oScoreEl.textContent = scores.o;
+    }
+
+    document.getElementById("restartRound").addEventListener("click", () => {
+      if (confirm("Restart this round?")) {
+        init();
+      }
+    });
+
+    document.getElementById("resetScore").addEventListener("click", () => {
+      if (confirm("Reset all scores?")) {
+        scores = { x: 0, o: 0 };
+        roundNumber = 1;
+        updateScores();
+        roundNumberEl.textContent = roundNumber;
+        init();
+      }
+    });
+
+    document.getElementById("quit").addEventListener("click", () => {
+      if (confirm("Quit to main menu?")) {
+        window.location.href = "index.html";
+      }
+    });
+
+    // Mode selection handlers
+    modeHumanBtn.addEventListener("click", () => {
+      gameMode = "human";
+      bots = { X: false, O: false };
+      modeHumanBtn.className = "bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition";
+      modeBotBtn.className = "bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition";
+      // modeBotBotBtn removed; no class change
+      botAsXBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition mr-1";
+      botAsOBtn.className = "bg-lightBlue text-navy-900 px-3 py-1 rounded-lg text-xs hover:brightness-110 transition";
+      init();
+    });
+
+    modeBotBtn.addEventListener("click", () => {
+      gameMode = "bot";
+      // default: bot plays as O (player 2)
+      bots = { X: false, O: true };
+      modeHumanBtn.className = "bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition";
+      modeBotBtn.className = "bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition";
+      // modeBotBotBtn removed; no class change
+      botAsXBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition mr-1";
+      botAsOBtn.className = "bg-lightBlue text-navy-900 px-3 py-1 rounded-lg text-xs hover:brightness-110 transition";
+      init();
+    });
+
+    // Bot vs Bot option removed.
+
+    botAsXBtn.addEventListener("click", () => {
+      // bot plays as X only
+      bots = { X: true, O: false };
+      botAsXBtn.className = "bg-lightBlue text-navy-900 px-3 py-1 rounded-lg text-xs hover:brightness-110 transition mr-1";
+      botAsOBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition";
+      // switch to bot mode if not already
+      gameMode = "bot";
+      modeHumanBtn.className = "bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition";
+      modeBotBtn.className = "bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition";
+      // modeBotBotBtn removed; no class change
+      init();
+    });
+
+    botAsOBtn.addEventListener("click", () => {
+      // bot plays as O only
+      bots = { X: false, O: true };
+      botAsXBtn.className = "bg-navy-700 text-white px-3 py-1 rounded-lg text-xs hover:bg-navy-600 transition mr-1";
+      botAsOBtn.className = "bg-lightBlue text-navy-900 px-3 py-1 rounded-lg text-xs hover:brightness-110 transition";
+      // switch to bot mode if not already
+      gameMode = "bot";
+      modeHumanBtn.className = "bg-navy-700 text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-navy-600 transition";
+      modeBotBtn.className = "bg-lightBlue text-navy-900 font-semibold py-2 px-3 rounded-lg text-sm hover:brightness-110 transition";
+      // modeBotBotBtn removed; no class change
+      init();
+    });
+
+    init();
+  </script>
+</body>
+</html>

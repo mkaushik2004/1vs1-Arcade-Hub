@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect-4 | 1v1 Arcade Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              900: "#0f2746",
+              800: "#1a3a5c",
+              700: "#2a4a6b"
+            },
+            lightBlue: "#5fa6ff",
+            cream: "#f7f1d3",
+            playerBlue: "#72a9eb"
+          },
+          fontFamily: { 
+            ui: ["Segoe UI", "Inter", "system-ui", "sans-serif"] 
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .disc {
+      width: 85%;
+      aspect-ratio: 1;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+    }
+    .hole {
+      aspect-ratio: 1;
+      cursor: pointer;
+    }
+    .hole:hover .disc.empty {
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-navy-900 text-white font-ui">
+  <!-- Header -->
+  <header class="w-full bg-navy-900 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">🎮</span>
+        <span class="text-lg font-semibold">1v1 Arcade Hub</span>
+      </div>
+      <nav class="flex items-center gap-8">
+        <a href="tic-tac-toe.html" class="text-slate-300 hover:text-white transition">Tic-Tac-Toe</a>
+        <a href="connect4.html" class="text-lightBlue font-semibold border-b-2 border-lightBlue pb-1">Connect-4</a>
+        <a href="rock-paper-scissor.html" class="text-slate-300 hover:text-white transition">Rock-Paper-Scissors</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="bg-lightBlue text-navy-900 px-4 py-2 rounded-lg font-semibold hover:brightness-110 transition" onclick="initBoard()">New Game</button>
+        <img src="asset/profile/profile.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-lightBlue/30">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-6">
+      
+      <!-- Left Panel: Player 1 Info & Tip -->
+      <aside class="space-y-4">
+        <!-- Player 1 Card -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <div class="flex flex-col items-center mb-4">
+            <img src="asset/profile/profile.jpg" alt="Player 1" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 mb-3">
+            <p class="text-xs text-navy-900/70 font-semibold uppercase mb-1">PLAYER 1 (YOU)</p>
+            <p class="text-2xl font-bold text-navy-900">KEVIN</p>
+          </div>
+          <div class="mb-4">
+            <p class="text-xs text-navy-900/70 mb-1">Wins</p>
+            <div class="flex items-center gap-3">
+              <span class="text-5xl font-black text-navy-900" id="p1Score">0</span>
+              <div class="flex gap-1 text-lightBlue text-xl">
+                <span class="text-lightBlue">★</span>
+                <span class="text-lightBlue">★</span>
+                <span class="text-navy-900/30">★</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+            <span class="text-navy-900 font-semibold">Online</span>
+          </div>
+        </div>
+
+        <!-- Tip Card -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">💡</span>
+            <p class="text-sm font-bold text-navy-900 uppercase">TIP</p>
+          </div>
+          <p class="text-sm text-navy-900/90 leading-relaxed">
+            Control the center column! It gives you more opportunities to connect 4 horizontally, vertically, and diagonally.
+          </p>
+        </div>
+      </aside>
+
+      <!-- Center Panel: Game Board -->
+      <section class="flex flex-col">
+        <!-- Turn Indicator -->
+        <div class="bg-lightBlue rounded-xl px-6 py-3 mb-6 flex items-center justify-between shadow-lg">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">↻</span>
+            <span class="font-bold text-navy-900" id="turnLabel">YOUR TURN</span>
+          </div>
+          <div class="font-mono text-navy-900 font-semibold" id="timer">00:24</div>
+        </div>
+
+        <!-- Connect-4 Board -->
+        <div class="bg-navy-800 rounded-3xl p-6 shadow-2xl">
+          <div id="board" class="grid grid-cols-7 gap-2 bg-navy-900 rounded-2xl p-4">
+            <!-- Cells will be injected here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Opponent, Controls, History -->
+      <aside class="space-y-4">
+        <!-- Opponent Card -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <p class="text-xs text-navy-900/70 font-semibold uppercase mb-1">OPPONENT</p>
+              <p class="text-xl font-bold text-navy-900">BOT_PLAYER</p>
+            </div>
+            <div class="w-14 h-14 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl">🤖</div>
+          </div>
+          <div>
+            <p class="text-xs text-navy-900/70 mb-1">Wins</p>
+            <div class="flex items-center gap-3">
+              <span class="text-5xl font-black text-navy-900" id="p2Score">0</span>
+              <span class="text-sm text-navy-900/80 font-semibold" id="botStatus">THINKING...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game Controls Card -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <p class="text-sm font-bold text-navy-900 uppercase mb-4">GAME CONTROLS</p>
+          <div class="space-y-3">
+            <button id="restartRound" class="w-full bg-lightBlue text-navy-900 font-bold py-3 rounded-xl shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2 border-2 border-navy-900/20">
+              <span>↻</span>
+              <span>Restart Game</span>
+            </button>
+            <button id="surrender" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2">
+              <span>🏳</span>
+              <span>Surrender</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Match History Card -->
+        <div class="bg-lightBlue rounded-2xl p-5 shadow-lg">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-bold text-navy-900 uppercase">MATCH HISTORY</p>
+            <span class="text-xl">↻</span>
+          </div>
+          <div class="space-y-2 text-sm" id="history">
+            <div class="flex justify-between items-center">
+              <span class="text-navy-900 font-semibold">Game 1</span>
+              <span class="text-navy-900">You Won</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-navy-900 font-semibold">Game 2</span>
+              <span class="text-navy-900">Draw</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-navy-900 font-semibold">Game 3</span>
+              <span class="text-red-600 font-semibold">Lost</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const ROWS = 6, COLS = 7;
+    let grid, currentPlayer, scores = { p1: 0, p2: 0 }, gameOver = false, matchHistory = [];
+    let timerStart = null, timerInterval = null;
+
+    const boardEl = document.getElementById("board");
+    const turnLabel = document.getElementById("turnLabel");
+    const p1ScoreEl = document.getElementById("p1Score");
+    const p2ScoreEl = document.getElementById("p2Score");
+    const historyEl = document.getElementById("history");
+    const timerEl = document.getElementById("timer");
+    const botStatusEl = document.getElementById("botStatus");
+
+    function startTimer() {
+      timerStart = Date.now();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const diff = Math.floor((Date.now() - timerStart) / 1000);
+        const m = String(Math.floor(diff / 60)).padStart(2, "0");
+        const s = String(diff % 60).padStart(2, "0");
+        timerEl.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    function initBoard() {
+      grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      currentPlayer = 1;
+      gameOver = false;
+      render();
+      updateTurnLabel();
+      startTimer();
+      botStatusEl.textContent = currentPlayer === 1 ? "" : "THINKING...";
+    }
+
+    function render() {
+      boardEl.innerHTML = "";
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement("button");
+          cell.className = "hole bg-navy-800 rounded-full flex items-center justify-center p-2 hover:bg-navy-700 transition";
+          cell.dataset.col = c;
+          const disc = document.createElement("div");
+          disc.className = "disc";
+          if (grid[r][c] === 1) {
+            disc.classList.add("bg-cream");
+          } else if (grid[r][c] === 2) {
+            disc.classList.add("bg-playerBlue");
+          } else {
+            disc.classList.add("empty", "bg-navy-700");
+          }
+          cell.appendChild(disc);
+          if (!gameOver) {
+            cell.addEventListener("click", () => handleMove(c));
+          }
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function handleMove(col) {
+      if (gameOver || currentPlayer !== 1) return;
+      const row = findOpenRow(col);
+      if (row === -1) return;
+      
+      grid[row][col] = currentPlayer;
+      render();
+      
+      if (checkWinner(row, col, currentPlayer)) {
+        gameOver = true;
+        scores.p1++;
+        updateScores();
+        addToHistory("You Won");
+        turnLabel.textContent = "YOU WIN!";
+        botStatusEl.textContent = "";
+        clearInterval(timerInterval);
+        setTimeout(() => {
+          if (confirm("You won! Start a new game?")) initBoard();
+        }, 500);
+        return;
+      }
+      
+      if (isFull()) {
+        gameOver = true;
+        addToHistory("Draw");
+        turnLabel.textContent = "DRAW";
+        botStatusEl.textContent = "";
+        clearInterval(timerInterval);
+        setTimeout(() => {
+          if (confirm("It's a draw! Start a new game?")) initBoard();
+        }, 500);
+        return;
+      }
+      
+      currentPlayer = 2;
+      updateTurnLabel();
+      botStatusEl.textContent = "THINKING...";
+      
+      // Bot move after a short delay
+      setTimeout(() => {
+        if (!gameOver) {
+          botMove();
+        }
+      }, 1000);
+    }
+
+    function botMove() {
+      if (gameOver || currentPlayer !== 2) return;
+      
+      // Simple bot: try to win, block player, or random
+      let col = -1;
+      
+      // Check for winning move
+      for (let c = 0; c < COLS; c++) {
+        const r = findOpenRow(c);
+        if (r !== -1) {
+          grid[r][c] = 2;
+          if (checkWinner(r, c, 2)) {
+            col = c;
+            grid[r][c] = 0;
+            break;
+          }
+          grid[r][c] = 0;
+        }
+      }
+      
+      // Check for blocking move
+      if (col === -1) {
+        for (let c = 0; c < COLS; c++) {
+          const r = findOpenRow(c);
+          if (r !== -1) {
+            grid[r][c] = 1;
+            if (checkWinner(r, c, 1)) {
+              col = c;
+              grid[r][c] = 0;
+              break;
+            }
+            grid[r][c] = 0;
+          }
+        }
+      }
+      
+      // Random move
+      if (col === -1) {
+        const availableCols = [];
+        for (let c = 0; c < COLS; c++) {
+          if (findOpenRow(c) !== -1) availableCols.push(c);
+        }
+        if (availableCols.length > 0) {
+          col = availableCols[Math.floor(Math.random() * availableCols.length)];
+        }
+      }
+      
+      if (col !== -1) {
+        const row = findOpenRow(col);
+        grid[row][col] = 2;
+        render();
+        
+        if (checkWinner(row, col, 2)) {
+          gameOver = true;
+          scores.p2++;
+          updateScores();
+          addToHistory("Lost");
+          turnLabel.textContent = "YOU LOST";
+          botStatusEl.textContent = "";
+          clearInterval(timerInterval);
+          setTimeout(() => {
+            if (confirm("You lost! Start a new game?")) initBoard();
+          }, 500);
+          return;
+        }
+        
+        if (isFull()) {
+          gameOver = true;
+          addToHistory("Draw");
+          turnLabel.textContent = "DRAW";
+          botStatusEl.textContent = "";
+          clearInterval(timerInterval);
+          setTimeout(() => {
+            if (confirm("It's a draw! Start a new game?")) initBoard();
+          }, 500);
+          return;
+        }
+        
+        currentPlayer = 1;
+        updateTurnLabel();
+        botStatusEl.textContent = "";
+      }
+    }
+
+    function findOpenRow(col) {
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (grid[r][col] === 0) return r;
+      }
+      return -1;
+    }
+
+    function checkLine(r, c, dr, dc, player) {
+      let count = 0;
+      let row = r, col = c;
+      while (row >= 0 && row < ROWS && col >= 0 && col < COLS && grid[row][col] === player) {
+        count++;
+        row += dr;
+        col += dc;
+      }
+      return count;
+    }
+
+    function checkWinner(r, c, player) {
+      const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+      return directions.some(([dr, dc]) => {
+        const count = checkLine(r, c, dr, dc, player) + checkLine(r, c, -dr, -dc, player) - 1;
+        return count >= 4;
+      });
+    }
+
+    function isFull() {
+      return grid.every(row => row.every(v => v !== 0));
+    }
+
+    function updateTurnLabel() {
+      turnLabel.textContent = currentPlayer === 1 ? "YOUR TURN" : "OPPONENT'S TURN";
+    }
+
+    function updateScores() {
+      p1ScoreEl.textContent = scores.p1;
+      p2ScoreEl.textContent = scores.p2;
+    }
+
+    function addToHistory(result) {
+      matchHistory.unshift({ game: `Game ${matchHistory.length + 1}`, result });
+      if (matchHistory.length > 3) matchHistory.pop();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      historyEl.innerHTML = "";
+      matchHistory.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center";
+        const gameSpan = document.createElement("span");
+        gameSpan.className = "text-navy-900 font-semibold";
+        gameSpan.textContent = item.game;
+        const resultSpan = document.createElement("span");
+        resultSpan.className = item.result === "Lost" ? "text-red-600 font-semibold" : "text-navy-900";
+        resultSpan.textContent = item.result === "Lost" ? "Lost" : item.result === "You Won" ? "You Won" : "Draw";
+        div.appendChild(gameSpan);
+        div.appendChild(resultSpan);
+        historyEl.appendChild(div);
+      });
+      
+      // Fill remaining slots with placeholder
+      while (historyEl.children.length < 3) {
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center";
+        const gameSpan = document.createElement("span");
+        gameSpan.className = "text-navy-900/50 font-semibold";
+        gameSpan.textContent = `Game ${historyEl.children.length + 1}`;
+        const resultSpan = document.createElement("span");
+        resultSpan.className = "text-navy-900/50";
+        resultSpan.textContent = "-";
+        div.appendChild(gameSpan);
+        div.appendChild(resultSpan);
+        historyEl.appendChild(div);
+      }
+    }
+
+    // Event Listeners
+    document.getElementById("restartRound").addEventListener("click", () => {
+      if (confirm("Restart this round?")) {
+        initBoard();
+      }
+    });
+
+    document.getElementById("surrender").addEventListener("click", () => {
+      if (confirm("Are you sure you want to surrender?")) {
+        gameOver = true;
+        scores.p2++;
+        updateScores();
+        addToHistory("Lost");
+        turnLabel.textContent = "SURRENDERED";
+        botStatusEl.textContent = "";
+        clearInterval(timerInterval);
+      }
+    });
+
+    // Initialize
+    initBoard();
+    renderHistory();
+  </script>
+</body>
+</html>

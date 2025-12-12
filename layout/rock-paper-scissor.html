@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock-Paper-Scissors | 1v1 Arcade Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 900: "#0f2746", 800: "#12355f", 700: "#1a446d" },
+            accent: "#5fa6ff",
+            steel: "#102b4c",
+            card: "#2b4f7d",
+            cream: "#f7f1d3",
+            ocean: "#72a9eb",
+            win: "#3bc486",
+            lose: "#f05b6b",
+          },
+          fontFamily: { ui: ["Poppins","Segoe UI","Inter","system-ui","sans-serif"] }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-screen bg-navy-900 text-white font-ui">
+  <!-- Header -->
+  <header class="w-full border-b border-white/10 bg-navy-900">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">🎮</span>
+        <span class="text-lg font-semibold">1v1 Arcade Hub</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-8 text-slate-200/80">
+        <a href="tic-tac-toe.html" class="hover:text-white">Tic-Tac-Toe</a>
+        <a href="connect4.html" class="hover:text-white">Connect-4</a>
+        <a class="text-white font-semibold border-b-2 border-white pb-1">Rock-Paper-Scissors</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button id="newGame" class="bg-accent text-navy-900 font-semibold px-4 py-2 rounded-lg shadow-lg hover:brightness-110 transition">New Game</button>
+        <img src="asset/profile/profile.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-accent/40">
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+    <!-- Top row: Round / board / opponent -->
+    <div class="grid grid-cols-1 lg:grid-cols-[260px_1fr_260px] gap-5">
+      <!-- Left stats -->
+      <aside class="space-y-4">
+        <div class="bg-navy-800 rounded-2xl p-5 shadow-lg">
+          <p class="text-2xl font-bold">Round <span id="roundNum">1</span></p>
+          <p class="text-sm text-slate-200/70">Best of 5 Series</p>
+        </div>
+        <div class="bg-navy-800 rounded-2xl p-5 shadow-lg flex flex-col items-center gap-3">
+          <img src="asset/profile/profile.jpg" alt="Player" class="w-20 h-20 rounded-full object-cover border-2 border-accent/50">
+          <div class="text-center space-y-1">
+            <p class="text-sm text-slate-200/70 tracking-[0.2em]">KEVIN</p>
+            <p class="text-5xl font-black" id="p1Score">0</p>
+            <div id="playerBadge" class="text-xs font-bold text-navy-900 bg-accent px-3 py-1 rounded-full inline-block">WINNING</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: choices -->
+      <section class="flex flex-col gap-4">
+        <div class="bg-accent text-navy-900 rounded-xl px-4 py-2 text-xs font-bold w-max self-center shadow-md">YOUR TURN</div>
+        <div class="bg-accent/10 border border-accent/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <div class="absolute inset-0 opacity-20">
+            <img src="asset/img/rock-paper-scissor.png" alt="Rock Paper Scissors" class="w-full h-full object-cover">
+          </div>
+          <div class="relative z-10">
+            <h1 class="text-center text-3xl sm:text-4xl font-extrabold mb-4">Choose Your Weapon</h1>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button class="choice group relative overflow-hidden rounded-2xl bg-navy-800/80 backdrop-blur-sm border border-white/10 shadow-xl focus:outline-none hover:bg-navy-800 transition" data-move="rock">
+                <img src="asset/rock-paper-scissor/ROCK.png" alt="Rock" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+                <div class="relative h-64 flex flex-col items-center justify-center gap-3">
+                  <span class="bg-white/80 text-navy-900 font-bold px-3 py-2 rounded-full text-lg shadow">✊</span>
+                  <span class="text-lg font-extrabold tracking-wide">ROCK</span>
+                </div>
+              </button>
+              <button class="choice group relative overflow-hidden rounded-2xl bg-navy-800/80 backdrop-blur-sm border border-white/10 shadow-xl focus:outline-none hover:bg-navy-800 transition" data-move="paper">
+                <img src="asset/rock-paper-scissor/PAPER.png" alt="Paper" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+                <div class="relative h-64 flex flex-col items-center justify-center gap-3">
+                  <span class="bg-white/80 text-navy-900 font-bold px-3 py-2 rounded-full text-lg shadow">✋</span>
+                  <span class="text-lg font-extrabold tracking-wide">PAPER</span>
+                </div>
+              </button>
+              <button class="choice group relative overflow-hidden rounded-2xl bg-navy-800/80 backdrop-blur-sm border border-white/10 shadow-xl focus:outline-none hover:bg-navy-800 transition" data-move="scissors">
+                <img src="asset/rock-paper-scissor/SCISSORS.png" alt="Scissors" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/40"></div>
+                <div class="relative h-64 flex flex-col items-center justify-center gap-3">
+                  <span class="bg-white/80 text-navy-900 font-bold px-3 py-2 rounded-full text-lg shadow">✌️</span>
+                  <span class="text-lg font-extrabold tracking-wide">SCISSORS</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: opponent -->
+      <aside class="space-y-4">
+        <div class="bg-navy-800 rounded-2xl p-5 shadow-lg flex flex-col items-center gap-3">
+          <div class="text-center space-y-1">
+            <p class="text-sm text-slate-200/70 tracking-[0.2em]">BOT_PLAYER</p>
+            <p class="text-5xl font-black" id="p2Score">0</p>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-navy-700 border border-white/10 flex items-center justify-center text-2xl">🤖</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Bottom row: battle log + restart -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-stretch">
+      <div class="bg-navy-800 rounded-2xl p-5 shadow-lg">
+        <div class="flex items-center gap-2 text-lg font-semibold mb-3">
+          <span class="text-slate-200/80">↻</span>
+          <span>Battle Log</span>
+          <span class="ml-auto text-xs text-slate-200/70" id="lastRoundsLabel">Last 5 Rounds</span>
+        </div>
+        <div id="history" class="flex flex-wrap gap-2 text-sm"></div>
+      </div>
+      <div class="bg-accent text-navy-900 rounded-2xl p-5 shadow-xl flex flex-col items-center justify-center gap-2">
+        <span class="text-4xl">↻</span>
+        <p class="font-bold text-lg">Restart Match</p>
+        <p class="text-sm text-navy-900/80">Reset score to 0-0</p>
+        <button id="restartMatch" class="mt-2 px-4 py-2 rounded-lg bg-white text-navy-900 font-semibold shadow hover:brightness-95 transition">Restart</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const beats = { rock: "scissors", paper: "rock", scissors: "paper" };
+    const historyEl = document.getElementById("history");
+    const turnLabelEl = document.querySelector("main .bg-accent.text-navy-900");
+    const p1ScoreEl = document.getElementById("p1Score");
+    const p2ScoreEl = document.getElementById("p2Score");
+    const playerBadgeEl = document.getElementById("playerBadge");
+    const roundNumEl = document.getElementById("roundNum");
+
+    let scores = { p1: 0, p2: 0 };
+    let history = [];
+    let locked = false;
+
+    function setBadge() {
+      if (scores.p1 > scores.p2) {
+        playerBadgeEl.textContent = "WINNING";
+        playerBadgeEl.className = "text-xs font-bold text-navy-900 bg-win px-3 py-1 rounded-full inline-block";
+      } else if (scores.p1 < scores.p2) {
+        playerBadgeEl.textContent = "LOSING";
+        playerBadgeEl.className = "text-xs font-bold text-white bg-lose px-3 py-1 rounded-full inline-block";
+      } else {
+        playerBadgeEl.textContent = "TIED";
+        playerBadgeEl.className = "text-xs font-bold text-navy-900 bg-accent px-3 py-1 rounded-full inline-block";
+      }
+    }
+
+    function updateScores() {
+      p1ScoreEl.textContent = scores.p1;
+      p2ScoreEl.textContent = scores.p2;
+      setBadge();
+    }
+
+    function pushHistory(result, p1, p2) {
+      history.unshift({ result, p1, p2 });
+      if (history.length > 5) history.pop();
+      renderHistory();
+      roundNumEl.textContent = history.length + 1;
+    }
+
+    function renderHistory() {
+      historyEl.innerHTML = "";
+      if (!history.length) {
+        const span = document.createElement("span");
+        span.className = "text-slate-200/70";
+        span.textContent = "No rounds yet.";
+        historyEl.appendChild(span);
+        return;
+      }
+      history.forEach((item) => {
+        const pill = document.createElement("div");
+        pill.className = "px-3 py-2 rounded-full flex items-center gap-2";
+        if (item.result === "win") {
+          pill.classList.add("bg-win/20","text-win","border","border-win/40");
+          pill.textContent = `VICTORY ✊ ${item.p1} vs ${item.p2}`;
+        } else if (item.result === "loss") {
+          pill.classList.add("bg-lose/20","text-lose","border","border-lose/40");
+          pill.textContent = `DEFEAT ❌ ${item.p1} vs ${item.p2}`;
+        } else {
+          pill.classList.add("bg-white/10","text-white","border","border-white/20");
+          pill.textContent = `DRAW 🤝 ${item.p1} vs ${item.p2}`;
+        }
+        historyEl.appendChild(pill);
+      });
+    }
+
+    function botPick() {
+      const moves = ["rock","paper","scissors"];
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    function decide(p1, p2) {
+      if (p1 === p2) return "draw";
+      return beats[p1] === p2 ? "win" : "loss";
+    }
+
+    function handleChoice(move) {
+      if (locked) return;
+      locked = true;
+      turnLabelEl.textContent = "Bot Thinking...";
+      const bot = botPick();
+      const outcome = decide(move, bot);
+
+      if (outcome === "win") scores.p1++;
+      if (outcome === "loss") scores.p2++;
+      updateScores();
+      pushHistory(outcome, move, bot);
+
+      setTimeout(() => {
+        turnLabelEl.textContent = "Your Turn";
+        locked = false;
+      }, 700);
+    }
+
+    function restartMatch() {
+      scores = { p1: 0, p2: 0 };
+      history = [];
+      updateScores();
+      renderHistory();
+      roundNumEl.textContent = 1;
+      turnLabelEl.textContent = "Your Turn";
+    }
+
+    document.querySelectorAll(".choice").forEach(btn => {
+      btn.addEventListener("click", () => handleChoice(btn.dataset.move));
+    });
+    document.getElementById("restartMatch").addEventListener("click", restartMatch);
+    document.getElementById("newGame").addEventListener("click", restartMatch);
+
+    // init
+    updateScores();
+    renderHistory();
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1v1 Arcade Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              900: "#0f2746",
+              800: "#12355f",
+              700: "#184276"
+            },
+            accent: "#5fa6ff"
+          },
+          fontFamily: { ui: ["Poppins","Segoe UI","Inter","system-ui","sans-serif"] }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-screen bg-navy-900 text-white font-ui">
+  <header class="flex justify-between items-center px-6 lg:px-12 py-6">
+    <div class="flex items-center gap-3 text-lg font-semibold">
+      <span>🎮</span>
+      <span>1v1 Arcade Hub</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <button class="w-10 h-10 rounded-full bg-navy-800 flex items-center justify-center text-lg">⚙️</button>
+      <img src="asset/profile/profile.jpg" alt="Profile" class="w-10 h-10 rounded-full object-cover border-2 border-navy-700">
+    </div>
+  </header>
+
+  <main class="px-6 lg:px-12 pb-12">
+    <section class="grid gap-10 lg:grid-cols-[1.1fr_1fr] items-center">
+      <div>
+        <p class="text-4xl sm:text-5xl font-extrabold leading-tight">
+          <span class="text-white">Ready to </span><span class="text-accent">Play?</span>
+        </p>
+        <p class="text-slate-200/80 mt-3 text-lg">Choose your arena and challenge opponents in real-time.</p>
+      </div>
+      <div class="hidden lg:block"></div>
+    </section>
+
+    <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-[1fr_1.4fr_1fr] mt-6">
+      <article class="bg-navy-800 rounded-2xl overflow-hidden border border-white/5 shadow-xl flex flex-col">
+        <img src="asset/img/connect4.png" alt="Connect 4" class="w-full h-56 object-cover">
+        <div class="p-5 flex flex-col gap-3 flex-1">
+          <h3 class="text-2xl font-extrabold">Connect-4</h3>
+          <p class="text-slate-200/80 text-sm leading-relaxed">Drop tokens, stack 4 to win. Strategy is key.</p>
+          <div class="mt-auto">
+            <a href="connect4.html" class="inline-flex items-center justify-center gap-2 bg-accent text-navy-900 font-semibold px-5 py-3 rounded-xl shadow-lg hover:brightness-105 transition w-full sm:w-auto">
+              ▶ Play Now
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="bg-[#7ccaf4] rounded-2xl overflow-hidden shadow-xl flex flex-col">
+        <img src="asset/img/tic-tac-toe.png" alt="Tic Tac Toe" class="w-full h-72 object-cover">
+        <div class="bg-navy-700 text-white p-6 flex flex-col gap-3 flex-1">
+          <h3 class="text-3xl font-extrabold">Tic-Tac-Toe</h3>
+          <p class="text-slate-200/90 text-base leading-relaxed">
+            The classic 3-in-a-row game. Master the grid and outsmart your opponent in this timeless strategy battle.
+          </p>
+          <div class="mt-auto">
+            <a href="tic-tac-toe.html" class="inline-flex items-center justify-center gap-2 bg-accent text-navy-900 font-semibold px-6 py-3 rounded-xl shadow-lg hover:brightness-105 transition w-full sm:w-auto text-lg">
+              ▶ Play Now
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="bg-navy-800 rounded-2xl overflow-hidden border border-white/5 shadow-xl flex flex-col">
+        <img src="asset/img/rock-paper-scissor.png" alt="Rock Paper Scissors" class="w-full h-56 object-cover">
+        <div class="p-5 flex flex-col gap-3 flex-1">
+          <h3 class="text-2xl font-extrabold">Rock Paper Scissors</h3>
+          <p class="text-slate-200/80 text-sm leading-relaxed">Luck meets psychology. Can you predict the move?</p>
+          <div class="mt-auto">
+            <a href="rock-paper-scissor.html" class="inline-flex items-center justify-center gap-2 bg-accent text-navy-900 font-semibold px-5 py-3 rounded-xl shadow-lg hover:brightness-105 transition w-full sm:w-auto">
+              ▶ Play Now
+            </a>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="mt-auto px-6 lg:px-12 py-6 text-slate-200/70 text-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <span>© 2024 1v1 Arcade Hub. All rights reserved.</span>
+      <div class="flex gap-4">
+        <a class="hover:text-white" href="#">Rules</a>
+        <a class="hover:text-white" href="#">Leaderboard</a>
+        <a class="hover:text-white" href="#">About</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
